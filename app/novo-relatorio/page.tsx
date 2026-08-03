@@ -19,6 +19,7 @@ export default function NovoRelatorio() {
   const [authenticated, setAuthenticated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [userId, setUserId] = useState<string>('');
+  const [currentUserName, setCurrentUserName] = useState('');
 
   const [formData, setFormData] = useState<MaintenanceReport>({
     user_id: '',
@@ -52,13 +53,44 @@ export default function NovoRelatorio() {
     parts2: [],
   });
 
+  const generateReportNumber = async (userIdToUse: string, userName: string) => {
+    const initials = userName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0].toUpperCase())
+      .join('') || 'RA';
+
+    const { count, error } = await supabase
+      .from('maintenance_reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userIdToUse);
+
+    if (error) {
+      console.error('Erro ao contar relatórios:', error);
+      return `${initials}0001`;
+    }
+
+    return `${initials}${String((count ?? 0) + 1).padStart(4, '0')}`;
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        const userDisplayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
+        const generatedNumber = await generateReportNumber(user.id, userDisplayName);
+
         setAuthenticated(true);
         setUserId(user.id);
-        setFormData(prev => ({ ...prev, user_id: user.id }));
+        setCurrentUserName(userDisplayName);
+        setFormData(prev => ({
+          ...prev,
+          user_id: user.id,
+          responsible: userDisplayName,
+          report_number: generatedNumber,
+        }));
       } else {
         setAuthenticated(false);
       }
@@ -111,8 +143,12 @@ export default function NovoRelatorio() {
         item => item.tipo_maquina || item.numero_maquina || item.numero_patrimonio || item.produto_quantidade_aplicada || item.material_acabamento || item.material_onde_aplicado
       );
 
+      const reportNumber = formData.report_number || await generateReportNumber(userId || formData.user_id, currentUserName || 'Usuário');
+
       const dataToSave = {
         ...formData,
+        report_number: reportNumber,
+        responsible: currentUserName || formData.responsible || '',
         line_items: validLineItems,
       };
 
@@ -229,45 +265,18 @@ export default function NovoRelatorio() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Local
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleHeaderChange('location', e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  placeholder="Ex: Pavilhão A"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Responsável
-                </label>
-                <input
-                  type="text"
-                  value={formData.responsible}
-                  onChange={(e) => handleHeaderChange('responsible', e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  placeholder="Ex: João Silva"
-                />
-              </div>
             </div>
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Observações
+                Serviço Realizado
               </label>
               <textarea
                 value={formData.observations || ''}
                 onChange={(e) => handleHeaderChange('observations', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm resize-none"
                 rows={3}
-                placeholder="Observações gerais sobre a manutenção..."
+                placeholder="Descreva o serviço realizado..."
               />
             </div>
           </div>

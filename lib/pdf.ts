@@ -46,10 +46,10 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_state || '-'}</td>
           </tr>
           <tr>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Função:</strong></td>
-            <td style="width: 50%; padding: 8px; border: 1px solid #ddd; colspan: 2;">${report.function_description || '-'}</td>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Nº Relatório:</strong></td>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.report_number || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Tipo:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.report_type === 'chamado' ? 'Chamado' : 'Rotina'}</td>
           </tr>
         </table>
       </div>
@@ -71,14 +71,8 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.end_time || '-'}</td>
           </tr>
           <tr>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Local:</strong></td>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.location}</td>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Responsável:</strong></td>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.responsible}</td>
-          </tr>
-          <tr>
             <td colspan="4" style="padding: 8px; border: 1px solid #ddd;">
-              <strong>Observações:</strong><br>
+              <strong>Serviço Realizado:</strong><br>
               <span style="font-size: 10px;">${report.observations ? report.observations.replace(/\n/g, '<br>') : '-'}</span>
             </td>
           </tr>

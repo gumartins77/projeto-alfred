@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "Gerenciador de Relatórios",
   },
   icons: {
-    icon: "/icon.png",
+    icon: "/icon-512.png",
     apple: "/icon-192.png",
   },
 };

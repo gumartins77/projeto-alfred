@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -29,14 +30,22 @@ export default function Login() {
 
     try {
       if (isSignUp) {
+        const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://relatorio-maquinas.netlify.app';
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              full_name: fullName.trim(),
+            },
+            emailRedirectTo: `${appUrl}/dashboard`,
+          },
         });
         if (signUpError) throw signUpError;
         setError(null);
         setEmail('');
         setPassword('');
+        setFullName('');
         setIsSignUp(false);
         alert('Verifique seu email para confirmar o cadastro!');
       } else {
@@ -65,6 +74,22 @@ export default function Login() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isSignUp && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nome completo
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required={isSignUp}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                placeholder="Seu nome"
+              />
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email
@@ -116,6 +141,7 @@ export default function Login() {
               setError(null);
               setEmail('');
               setPassword('');
+              setFullName('');
             }}
             className="text-blue-600 hover:text-blue-700 font-medium text-sm"
           >

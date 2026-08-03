@@ -25,6 +25,7 @@ export default function RelatorioPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState('');
 
   const [formData, setFormData] = useState<MaintenanceReport | null>(null);
   const [parts, setParts] = useState<{ parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }>({
@@ -32,12 +33,36 @@ export default function RelatorioPage() {
     parts2: [],
   });
 
+  const generateReportNumber = async (userIdToUse: string, userName: string) => {
+    const initials = userName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0].toUpperCase())
+      .join('') || 'RA';
+
+    const { count, error } = await supabase
+      .from('maintenance_reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userIdToUse);
+
+    if (error) {
+      console.error('Erro ao contar relatórios:', error);
+      return `${initials}0001`;
+    }
+
+    return `${initials}${String((count ?? 0) + 1).padStart(4, '0')}`;
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        const userDisplayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
         setAuthenticated(true);
-        fetchReport();
+        setCurrentUserName(userDisplayName);
+        fetchReport(user);
       } else {
         setAuthenticated(false);
         setLoading(false);
@@ -47,7 +72,7 @@ export default function RelatorioPage() {
     checkAuth();
   }, []);
 
-  const fetchReport = async () => {
+  const fetchReport = async (user?: { id: string; user_metadata?: { full_name?: string; name?: string }; email?: string }) => {
     try {
       const { data, error } = await supabase
         .from('maintenance_reports')
@@ -57,8 +82,13 @@ export default function RelatorioPage() {
 
       if (error) throw error;
 
+      const userDisplayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário';
+      const reportNumber = data.report_number || (user ? await generateReportNumber(user.id, userDisplayName) : undefined);
+
       const report = {
         ...data,
+        report_number: reportNumber,
+        responsible: data.responsible || userDisplayName || '',
         line_items: typeof data.line_items === 'string'
           ? JSON.parse(data.line_items)
           : data.line_items || [],
@@ -124,10 +154,14 @@ export default function RelatorioPage() {
         item => item.tipo_maquina || item.numero_maquina || item.numero_patrimonio || item.produto_quantidade_aplicada || item.material_acabamento || item.material_onde_aplicado
       );
 
+      const reportNumber = formData.report_number || await generateReportNumber(formData.user_id || reportId, currentUserName || 'Usuário');
+
       const { error } = await supabase
         .from('maintenance_reports')
         .update({
           ...formData,
+          report_number: reportNumber,
+          responsible: currentUserName || formData.responsible || '',
           line_items: validLineItems,
         })
         .eq('id', reportId);
@@ -285,18 +319,10 @@ export default function RelatorioPage() {
                     <p className="text-lg font-semibold text-gray-800">{formData.end_time}</p>
                   </div>
                 )}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs font-medium text-gray-600">Local</p>
-                  <p className="text-lg font-semibold text-gray-800">{formData.location}</p>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs font-medium text-gray-600">Responsável</p>
-                  <p className="text-lg font-semibold text-gray-800">{formData.responsible}</p>
-                </div>
               </div>
               {formData.observations && (
                 <div className="mt-4 bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs font-medium text-gray-600">Observações</p>
+                  <p className="text-xs font-medium text-gray-600">Serviço Realizado</p>
                   <p className="text-gray-800 whitespace-pre-wrap">{formData.observations}</p>
                 </div>
               )}
@@ -410,29 +436,9 @@ export default function RelatorioPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Local</label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => handleHeaderChange('location', e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Responsável</label>
-                  <input
-                    type="text"
-                    value={formData.responsible}
-                    onChange={(e) => handleHeaderChange('responsible', e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  />
-                </div>
               </div>
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Serviço Realizado</label>
                 <textarea
                   value={formData.observations || ''}
                   onChange={(e) => handleHeaderChange('observations', e.target.value)}

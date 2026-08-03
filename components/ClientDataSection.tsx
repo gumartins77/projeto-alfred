@@ -39,14 +39,6 @@ export default function ClientDataSection({ formData, isEditing, onChangeField }
             <p className="text-lg font-semibold text-gray-800">{formData.client_state || '-'}</p>
           </div>
           <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-xs font-medium text-gray-600">Função</p>
-            <p className="text-lg font-semibold text-gray-800">{formData.function_description || '-'}</p>
-          </div>
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-xs font-medium text-gray-600">Área de Serviço</p>
-            <p className="text-lg font-semibold text-gray-800">{formData.service_area || '-'}</p>
-          </div>
-          <div className="bg-gray-50 p-3 rounded-lg">
             <p className="text-xs font-medium text-gray-600">Nº do Relatório</p>
             <p className="text-lg font-semibold text-gray-800">{formData.report_number || '-'}</p>
           </div>
@@ -124,34 +116,13 @@ export default function ClientDataSection({ formData, isEditing, onChangeField }
             placeholder="SP"
           />
         </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Função</label>
-          <input
-            type="text"
-            value={formData.function_description || ''}
-            onChange={(e) => onChangeField('function_description', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-            placeholder="Descrição da função/atividade"
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Área de Serviço</label>
-          <input
-            type="text"
-            value={formData.service_area || ''}
-            onChange={(e) => onChangeField('service_area', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-            placeholder="Área de serviço"
-          />
-        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Nº do Relatório</label>
           <input
             type="text"
             value={formData.report_number || ''}
-            onChange={(e) => onChangeField('report_number', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-            placeholder="Ex: REL-001"
+            readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
           />
         </div>
         <div>
