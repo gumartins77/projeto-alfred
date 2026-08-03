@@ -349,8 +349,8 @@ export default function RelatorioPage() {
               listNumber={1}
               isEditing={false}
               onAddPart={addPart}
-              onUpdatePart={updatePart}
-              onRemovePart={removePart}
+              onUpdatePart={(idx, field, value) => updatePart(1, idx, field, value)}
+              onRemovePart={(idx) => removePart(1, idx)}
             />
 
             <PartsListSection
@@ -358,8 +358,8 @@ export default function RelatorioPage() {
               listNumber={2}
               isEditing={false}
               onAddPart={addPart}
-              onUpdatePart={updatePart}
-              onRemovePart={removePart}
+              onUpdatePart={(idx, field, value) => updatePart(2, idx, field, value)}
+              onRemovePart={(idx) => removePart(2, idx)}
             />
 
             <SignaturesSection formData={formData} isEditing={false} onChangeField={handleHeaderChange} />
