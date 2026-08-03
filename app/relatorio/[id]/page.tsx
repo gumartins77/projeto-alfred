@@ -177,7 +177,7 @@ export default function RelatorioPage() {
     setGeneratingPdf(true);
 
     try {
-      await generatePDF(formData);
+      await generatePDF(formData, parts);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       alert('Erro ao gerar PDF');

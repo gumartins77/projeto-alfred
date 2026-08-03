@@ -1,9 +1,9 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { MaintenanceReport } from './types';
+import { MaintenanceReport, MaintenanceReportPart } from './types';
 import { formatDate } from './utils';
 
-export async function generatePDF(report: MaintenanceReport) {
+export async function generatePDF(report: MaintenanceReport, parts: { parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }) {
   // Create a temporary container for PDF content
   const container = document.createElement('div');
   container.style.position = 'absolute';
@@ -15,17 +15,49 @@ export async function generatePDF(report: MaintenanceReport) {
 
   // Build HTML content
   const html = `
-    <div style="width: 100%; font-family: Arial, sans-serif;">
-      <div style="border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px;">
-        <h1 style="margin: 0; text-align: center; font-size: 24px;">RELATÓRIO DE MANUTENÇÃO</h1>
-        <div style="text-align: center; margin-top: 10px; font-size: 12px;">
-          <p style="margin: 5px 0;">Formulário de Manutenção de Máquinas</p>
+    <div style="width: 100%; font-family: Arial, sans-serif; color: #333;">
+      <div style="border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
+        <h1 style="margin: 0; text-align: center; font-size: 22px; font-weight: bold;">BOLETIM DE MANUTENÇÃO</h1>
+        <div style="text-align: center; margin-top: 8px; font-size: 11px;">
+          <p style="margin: 3px 0;">Formulário de Manutenção de Máquinas</p>
         </div>
       </div>
 
+      <!-- SEÇÃO 1: DADOS DO CLIENTE -->
       <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">DADOS DO RELATÓRIO</h2>
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">1. DADOS DO CLIENTE</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+          <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Cliente:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_name || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Contato:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_contact || '-'}</td>
+          </tr>
+          <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Telefone:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_phone || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Endereço:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_address || '-'}</td>
+          </tr>
+          <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Cidade:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_city || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Estado:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_state || '-'}</td>
+          </tr>
+          <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Função:</strong></td>
+            <td style="width: 50%; padding: 8px; border: 1px solid #ddd; colspan: 2;">${report.function_description || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Nº Relatório:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.report_number || '-'}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- SEÇÃO 2: DADOS DO EQUIPAMENTO -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">2. DADOS DO EQUIPAMENTO</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
           <tr>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Nº Máquina:</strong></td>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.machine_number}</td>
@@ -44,57 +76,136 @@ export async function generatePDF(report: MaintenanceReport) {
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Responsável:</strong></td>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.responsible}</td>
           </tr>
+          <tr>
+            <td colspan="4" style="padding: 8px; border: 1px solid #ddd;">
+              <strong>Observações:</strong><br>
+              <span style="font-size: 10px;">${report.observations ? report.observations.replace(/\n/g, '<br>') : '-'}</span>
+            </td>
+          </tr>
         </table>
-        ${report.observations ? `
-          <div style="margin-top: 10px;">
-            <strong style="font-size: 12px;">Observações:</strong>
-            <p style="font-size: 11px; margin: 5px 0; padding: 8px; background-color: #f5f5f5; border-left: 3px solid #3b82f6;">${report.observations.replace(/\n/g, '<br>')}</p>
-          </div>
-        ` : ''}
       </div>
 
+      <!-- SEÇÃO 3: ITENS DE MANUTENÇÃO -->
       <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">ITENS DE MANUTENÇÃO</h2>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-          <thead>
-            <tr style="background-color: #f0f0f0;">
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;"><strong>Componente</strong></th>
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;"><strong>Condição</strong></th>
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;"><strong>Ação Recomendada</strong></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${report.line_items.map(item => `
-              <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.component}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                  <span style="
-                    padding: 3px 8px;
-                    border-radius: 3px;
-                    font-weight: bold;
-                    ${item.condition === 'BOM' ? 'background-color: #dcfce7; color: #166534;' : 
-                      item.condition === 'REGULAR' ? 'background-color: #fef3c7; color: #92400e;' : 
-                      'background-color: #fee2e2; color: #991b1b;'}
-                  ">${item.condition}</span>
-                </td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.action}</td>
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">3. ITENS DE MANUTENÇÃO</h2>
+        ${report.line_items.length > 0 ? `
+          <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+            <thead>
+              <tr style="background-color: #e8f0ff;">
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Tipo Máquina</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Nº Máquina</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Nº Patrimônio</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Produto/Qtd</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Material</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Onde Aplicado</strong></th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${report.line_items.map(item => `
+                <tr>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${item.tipo_maquina || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${item.numero_maquina || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${item.numero_patrimonio || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${item.produto_quantidade_aplicada || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${item.material_acabamento || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${item.material_onde_aplicado || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        ` : `<p style="font-size: 11px; color: #666;">Nenhum item registrado</p>`}
       </div>
 
-      <div style="margin-top: 30px; border-top: 2px solid #000; padding-top: 20px;">
-        <div style="display: flex; justify-content: space-between; font-size: 11px;">
-          <div style="text-align: center; width: 30%;">
-            <p style="margin: 0; padding-top: 30px; border-top: 1px solid #000;">Assinatura do Responsável</p>
-            <p style="margin: 5px 0; font-size: 10px;">${report.responsible}</p>
+      <!-- SEÇÃO 4: PEÇAS A SEREM SUBSTITUÍDAS -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">4. PEÇAS A SEREM SUBSTITUÍDAS</h2>
+        ${parts.parts1 && parts.parts1.length > 0 ? `
+          <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+            <thead>
+              <tr style="background-color: #fff3cd;">
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Nº Máquina</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Fig.</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Item</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Quantidade</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Descrição</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${parts.parts1.map(part => `
+                <tr>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.machine_number || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.fig || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.item || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${part.quantity || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.description || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        ` : `<p style="font-size: 11px; color: #666;">Nenhuma peça a substituir</p>`}
+      </div>
+
+      <!-- SEÇÃO 5: PEÇAS SUBSTITUÍDAS -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">5. PEÇAS SUBSTITUÍDAS</h2>
+        ${parts.parts2 && parts.parts2.length > 0 ? `
+          <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+            <thead>
+              <tr style="background-color: #d4edda;">
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Nº Máquina</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Fig.</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Item</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Quantidade</strong></th>
+                <th style="padding: 6px; border: 1px solid #ddd; text-align: left;"><strong>Descrição</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${parts.parts2.map(part => `
+                <tr>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.machine_number || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.fig || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.item || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${part.quantity || '-'}</td>
+                  <td style="padding: 6px; border: 1px solid #ddd;">${part.description || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        ` : `<p style="font-size: 11px; color: #666;">Nenhuma peça substituída</p>`}
+      </div>
+
+      <!-- SEÇÃO 6: VISTOS / ASSINATURAS -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">6. VISTOS / ASSINATURAS</h2>
+        <div style="display: flex; justify-content: space-between; gap: 20px;">
+          <div style="flex: 1; text-align: center; font-size: 11px;">
+            <div style="border: 1px solid #ddd; padding: 40px 10px; margin-bottom: 10px; min-height: 60px; background-color: #f9f9f9;">
+              <span style="color: #999; font-size: 10px;">${report.technical_signature ? report.technical_signature : '_____________________'}</span>
+            </div>
+            <strong>Visto Técnico</strong>
+            <p style="margin: 5px 0; font-size: 10px;">${report.technical_signature || 'Assinatura'}</p>
           </div>
-          <div style="text-align: center; width: 30%;">
-            <p style="margin: 0; padding-top: 30px; border-top: 1px solid #000;">Data de Impressão</p>
-            <p style="margin: 5px 0; font-size: 10px;">${formatDate(new Date().toISOString().split('T')[0])}</p>
+          <div style="flex: 1; text-align: center; font-size: 11px;">
+            <div style="border: 1px solid #ddd; padding: 40px 10px; margin-bottom: 10px; min-height: 60px; background-color: #f9f9f9;">
+              <span style="color: #999; font-size: 10px;">${report.client_signature ? report.client_signature : '_____________________'}</span>
+            </div>
+            <strong>Visto Cliente</strong>
+            <p style="margin: 5px 0; font-size: 10px;">${report.client_signature || 'Assinatura'}</p>
+          </div>
+          <div style="flex: 1; text-align: center; font-size: 11px;">
+            <div style="border: 1px solid #ddd; padding: 40px 10px; margin-bottom: 10px; min-height: 60px; background-color: #f9f9f9;">
+              <span style="color: #999; font-size: 10px;">${report.responsible_signature ? report.responsible_signature : '_____________________'}</span>
+            </div>
+            <strong>Visto Responsável</strong>
+            <p style="margin: 5px 0; font-size: 10px;">${report.responsible_signature || 'Assinatura'}</p>
           </div>
         </div>
+      </div>
+
+      <!-- RODAPÉ -->
+      <div style="margin-top: 30px; border-top: 2px solid #000; padding-top: 15px; font-size: 10px; text-align: right; color: #666;">
+        <p style="margin: 5px 0;">Data de Impressão: ${formatDate(new Date().toISOString().split('T')[0])}</p>
+        <p style="margin: 5px 0;">Relatório Nº: ${report.report_number || 'N/A'}</p>
       </div>
     </div>
   `;
