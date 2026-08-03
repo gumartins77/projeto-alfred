@@ -7,7 +7,6 @@ import Header from '@/components/Header';
 import Login from '@/components/Login';
 import ClientDataSection from '@/components/ClientDataSection';
 import PartsListSection from '@/components/PartsListSection';
-import SignaturesSection from '@/components/SignaturesSection';
 import { MaintenanceReport, MaintenanceReportPart, MaintenanceLineItem } from '@/lib/types';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -210,24 +209,10 @@ export default function NovoRelatorio() {
           {/* Dados do Cliente Section */}
           <ClientDataSection formData={formData} isEditing={true} onChangeField={handleHeaderChange} />
 
-          {/* Equipment and Service Data Section */}
+          {/* Service Data Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Dados do Equipamento</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Dados do Serviço</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nº Máquina
-                </label>
-                <input
-                  type="text"
-                  value={formData.machine_number}
-                  onChange={(e) => handleHeaderChange('machine_number', e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  placeholder="Ex: MNT-001"
-                />
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Data
@@ -431,9 +416,6 @@ export default function NovoRelatorio() {
             onUpdatePart={(idx, field, value) => updatePart(2, idx, field, value)}
             onRemovePart={(idx) => removePart(2, idx)}
           />
-
-          {/* Signatures Section */}
-          <SignaturesSection formData={formData} isEditing={true} onChangeField={handleHeaderChange} />
 
           {/* Submit Button */}
           <div className="flex gap-4 justify-end">

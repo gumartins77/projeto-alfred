@@ -7,7 +7,6 @@ import Header from '@/components/Header';
 import Login from '@/components/Login';
 import ClientDataSection from '@/components/ClientDataSection';
 import PartsListSection from '@/components/PartsListSection';
-import SignaturesSection from '@/components/SignaturesSection';
 import { MaintenanceReport, MaintenanceReportPart, MaintenanceLineItem } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import { Plus, Trash2, ArrowLeft, Download } from 'lucide-react';
@@ -257,7 +256,7 @@ export default function RelatorioPage() {
             <ArrowLeft size={24} />
           </Link>
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Relatório - {formData.machine_number}
+            Relatório - {formData.report_number || reportId}
           </h2>
         </div>
 
@@ -297,12 +296,8 @@ export default function RelatorioPage() {
             <ClientDataSection formData={formData} isEditing={false} onChangeField={handleHeaderChange} />
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Dados do Equipamento</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Dados do Serviço</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs font-medium text-gray-600">Nº Máquina</p>
-                  <p className="text-lg font-semibold text-gray-800">{formData.machine_number}</p>
-                </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <p className="text-xs font-medium text-gray-600">Data</p>
                   <p className="text-lg font-semibold text-gray-800">{formatDate(formData.date)}</p>
@@ -387,8 +382,6 @@ export default function RelatorioPage() {
               onUpdatePart={(idx, field, value) => updatePart(2, idx, field, value)}
               onRemovePart={(idx) => removePart(2, idx)}
             />
-
-            <SignaturesSection formData={formData} isEditing={false} onChangeField={handleHeaderChange} />
           </div>
         ) : (
           // Edit Mode
@@ -396,18 +389,8 @@ export default function RelatorioPage() {
             <ClientDataSection formData={formData} isEditing={true} onChangeField={handleHeaderChange} />
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Dados do Equipamento</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Dados do Serviço</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nº Máquina</label>
-                  <input
-                    type="text"
-                    value={formData.machine_number}
-                    onChange={(e) => handleHeaderChange('machine_number', e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Data</label>
                   <input
@@ -589,8 +572,6 @@ export default function RelatorioPage() {
               onUpdatePart={(idx, field, value) => updatePart(2, idx, field, value)}
               onRemovePart={(idx) => removePart(2, idx)}
             />
-
-            <SignaturesSection formData={formData} isEditing={true} onChangeField={handleHeaderChange} />
 
             <div className="flex gap-4 justify-end">
               <button

@@ -54,15 +54,15 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
         </table>
       </div>
 
-      <!-- SEÇÃO 2: DADOS DO EQUIPAMENTO -->
+      <!-- SEÇÃO 2: DADOS DO SERVIÇO -->
       <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">2. DADOS DO EQUIPAMENTO</h2>
+        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">2. DADOS DO SERVIÇO</h2>
         <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
           <tr>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Nº Máquina:</strong></td>
-            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.machine_number}</td>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Data:</strong></td>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${formatDate(report.date)}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Cidade:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.client_city || '-'}</td>
           </tr>
           <tr>
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Início:</strong></td>
@@ -168,34 +168,6 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
         ` : `<p style="font-size: 11px; color: #666;">Nenhuma peça substituída</p>`}
       </div>
 
-      <!-- SEÇÃO 6: VISTOS / ASSINATURAS -->
-      <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 13px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">6. VISTOS / ASSINATURAS</h2>
-        <div style="display: flex; justify-content: space-between; gap: 20px;">
-          <div style="flex: 1; text-align: center; font-size: 11px;">
-            <div style="border: 1px solid #ddd; padding: 40px 10px; margin-bottom: 10px; min-height: 60px; background-color: #f9f9f9;">
-              <span style="color: #999; font-size: 10px;">${report.technical_signature ? report.technical_signature : '_____________________'}</span>
-            </div>
-            <strong>Visto Técnico</strong>
-            <p style="margin: 5px 0; font-size: 10px;">${report.technical_signature || 'Assinatura'}</p>
-          </div>
-          <div style="flex: 1; text-align: center; font-size: 11px;">
-            <div style="border: 1px solid #ddd; padding: 40px 10px; margin-bottom: 10px; min-height: 60px; background-color: #f9f9f9;">
-              <span style="color: #999; font-size: 10px;">${report.client_signature ? report.client_signature : '_____________________'}</span>
-            </div>
-            <strong>Visto Cliente</strong>
-            <p style="margin: 5px 0; font-size: 10px;">${report.client_signature || 'Assinatura'}</p>
-          </div>
-          <div style="flex: 1; text-align: center; font-size: 11px;">
-            <div style="border: 1px solid #ddd; padding: 40px 10px; margin-bottom: 10px; min-height: 60px; background-color: #f9f9f9;">
-              <span style="color: #999; font-size: 10px;">${report.responsible_signature ? report.responsible_signature : '_____________________'}</span>
-            </div>
-            <strong>Visto Responsável</strong>
-            <p style="margin: 5px 0; font-size: 10px;">${report.responsible_signature || 'Assinatura'}</p>
-          </div>
-        </div>
-      </div>
-
       <!-- RODAPÉ -->
       <div style="margin-top: 30px; border-top: 2px solid #000; padding-top: 15px; font-size: 10px; text-align: right; color: #666;">
         <p style="margin: 5px 0;">Data de Impressão: ${formatDate(new Date().toISOString().split('T')[0])}</p>
@@ -241,7 +213,7 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
     }
 
     // Download PDF
-    pdf.save(`relatorio_${report.machine_number}_${report.date}.pdf`);
+    pdf.save(`relatorio_${report.report_number || report.date}.pdf`);
   } finally {
     document.body.removeChild(container);
   }

@@ -68,9 +68,9 @@ export default function Dashboard() {
 
     if (searchTerm) {
       filtered = filtered.filter(report =>
-        report.machine_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.responsible.toLowerCase().includes(searchTerm.toLowerCase())
+        (report.report_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (report.client_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (report.client_city || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -122,7 +122,7 @@ export default function Dashboard() {
               <Search className="absolute left-3 top-3 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Pesquisar por máquina, local ou responsável..."
+                placeholder="Pesquisar por relatório, cliente ou cidade..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
@@ -177,21 +177,21 @@ export default function Dashboard() {
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500 uppercase">Máquina</p>
+                    <p className="text-xs text-gray-500 uppercase">Relatório</p>
                     <p className="text-lg font-semibold text-gray-800">
-                      {report.machine_number}
+                      {report.report_number || ''}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 uppercase">Local</p>
+                    <p className="text-xs text-gray-500 uppercase">Cliente</p>
                     <p className="text-lg font-semibold text-gray-800">
-                      {report.location}
+                      {report.client_name || '-'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 uppercase">Responsável</p>
+                    <p className="text-xs text-gray-500 uppercase">Cidade</p>
                     <p className="text-lg font-semibold text-gray-800">
-                      {report.responsible}
+                      {report.client_city || '-'}
                     </p>
                   </div>
                   <div>

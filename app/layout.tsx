@@ -33,6 +33,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Relatórios" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icon-192.png" sizes="192x192" />
+        <link rel="icon" href="/icon-512.png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/icon-512.png" sizes="512x512" />
+        <link rel="mask-icon" href="/icon-512.png" color="#3b82f6" />
       </head>
       <body>
         <div className="flex flex-col min-h-screen bg-gray-50">
