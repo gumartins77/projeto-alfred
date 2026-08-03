@@ -10,13 +10,9 @@ export default function Header() {
   const [showMenu, setShowMenu] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isMobile, setIsMobile] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    setIsMobile(isMobileDevice);
-
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     const updateStandalone = () => setIsStandalone(mediaQuery.matches);
     updateStandalone();
@@ -62,18 +58,8 @@ export default function Header() {
     router.push('/');
   };
 
-  const showInstallHint = isMobile && !isStandalone && !canInstall;
-
   return (
-    <>
-      {showInstallHint && (
-        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2 text-sm text-blue-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <span>Instale o app na tela inicial para usar mais rápido.</span>
-          <span className="font-medium">Abra o menu do navegador e escolha “Adicionar à tela inicial”.</span>
-        </div>
-      )}
-
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
         <h1 className="text-lg sm:text-2xl font-bold text-gray-800">
           Relatórios
@@ -131,6 +117,5 @@ export default function Header() {
         )}
         </div>
       </header>
-    </>
   );
 }
