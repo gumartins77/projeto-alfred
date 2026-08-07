@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
@@ -186,13 +186,21 @@ export default function Dashboard() {
     return Object.values(map).sort((a, b) => b.key.localeCompare(a.key));
   }, [filteredReports]);
 
+  const hasSetInitialGroup = useRef(false);
+
   useEffect(() => {
     if (groups.length === 0) {
       setExpandedGroup(null);
       return;
     }
 
-    if (!expandedGroup || !groups.some(group => group.key === expandedGroup)) {
+    if (!hasSetInitialGroup.current) {
+      setExpandedGroup(groups[0].key);
+      hasSetInitialGroup.current = true;
+      return;
+    }
+
+    if (expandedGroup && !groups.some(group => group.key === expandedGroup)) {
       setExpandedGroup(groups[0].key);
     }
   }, [groups, expandedGroup]);
