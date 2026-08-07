@@ -53,6 +53,10 @@ export interface MaintenanceReport {
   location: string;
   responsible: string;
   observations?: string;
+  produto?: string;
+  ordem_producao?: string;
+  ordem_venda?: string;
+  lote?: string;
   
   // Line items (maintenance items)
   line_items: MaintenanceLineItem[];

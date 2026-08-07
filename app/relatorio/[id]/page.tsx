@@ -149,9 +149,16 @@ export default function RelatorioPage() {
     setSubmitting(true);
 
     try {
-      const validLineItems = formData.line_items.filter(
-        item => item.tipo_maquina || item.numero_maquina || item.numero_patrimonio || item.produto_quantidade_aplicada || item.material_acabamento || item.material_onde_aplicado
-      );
+      const validLineItems = formData.line_items
+        .filter(item => item.tipo_maquina || item.numero_maquina || item.numero_patrimonio || item.produto_quantidade_aplicada || item.material_acabamento || item.material_onde_aplicado)
+        .map(item => ({
+          tipo_maquina: item.tipo_maquina,
+          numero_maquina: item.numero_maquina,
+          numero_patrimonio: item.numero_patrimonio,
+          produto_quantidade_aplicada: item.produto_quantidade_aplicada,
+          material_acabamento: item.material_acabamento,
+          material_onde_aplicado: item.material_onde_aplicado,
+        }));
 
       const reportNumber = formData.report_number || await generateReportNumber(formData.user_id || reportId, currentUserName || 'Usuário');
 
@@ -321,6 +328,27 @@ export default function RelatorioPage() {
                   <p className="text-gray-800 whitespace-pre-wrap">{formData.observations}</p>
                 </div>
               )}
+
+              {(formData.produto || formData.ordem_producao || formData.ordem_venda || formData.lote) && (
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs font-medium text-gray-600">Produto</p>
+                    <p className="font-semibold text-gray-800">{formData.produto || '-'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs font-medium text-gray-600">Ordem de Produção</p>
+                    <p className="font-semibold text-gray-800">{formData.ordem_producao || '-'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs font-medium text-gray-600">Ordem de Venda</p>
+                    <p className="font-semibold text-gray-800">{formData.ordem_venda || '-'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs font-medium text-gray-600">Lote</p>
+                    <p className="font-semibold text-gray-800">{formData.lote || '-'}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -429,6 +457,45 @@ export default function RelatorioPage() {
                   rows={3}
                 />
               </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Produto</label>
+                  <input
+                    type="text"
+                    value={formData.produto || ''}
+                    onChange={(e) => handleHeaderChange('produto', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ordem de Produção</label>
+                  <input
+                    type="text"
+                    value={formData.ordem_producao || ''}
+                    onChange={(e) => handleHeaderChange('ordem_producao', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ordem de Venda</label>
+                  <input
+                    type="text"
+                    value={formData.ordem_venda || ''}
+                    onChange={(e) => handleHeaderChange('ordem_venda', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Lote</label>
+                  <input
+                    type="text"
+                    value={formData.lote || ''}
+                    onChange={(e) => handleHeaderChange('lote', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
@@ -536,6 +603,7 @@ export default function RelatorioPage() {
                         />
                       </div>
                     </div>
+
 
                     <div className="flex justify-end">
                       <button

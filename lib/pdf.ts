@@ -71,6 +71,18 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
             <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.end_time || '-'}</td>
           </tr>
           <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Produto:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.produto || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Ordem Produção:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.ordem_producao || '-'}</td>
+          </tr>
+          <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Ordem Venda:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.ordem_venda || '-'}</td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;"><strong>Lote:</strong></td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ddd;">${report.lote || '-'}</td>
+          </tr>
+          <tr>
             <td colspan="4" style="padding: 8px; border: 1px solid #ddd;">
               <strong>Serviço Realizado:</strong><br>
               <span style="font-size: 10px;">${report.observations ? report.observations.replace(/\n/g, '<br>') : '-'}</span>

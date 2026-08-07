@@ -42,6 +42,10 @@ export default function NovoRelatorio() {
     technical_signature: '',
     client_signature: '',
     responsible_signature: '',
+    produto: '',
+    ordem_producao: '',
+    ordem_venda: '',
+    lote: '',
     line_items: [
       { tipo_maquina: '', numero_maquina: '', numero_patrimonio: '', produto_quantidade_aplicada: '', material_acabamento: '', material_onde_aplicado: '' },
     ],
@@ -138,9 +142,16 @@ export default function NovoRelatorio() {
 
     try {
       // Filter out empty line items
-      const validLineItems = formData.line_items.filter(
-        item => item.tipo_maquina || item.numero_maquina || item.numero_patrimonio || item.produto_quantidade_aplicada || item.material_acabamento || item.material_onde_aplicado
-      );
+      const validLineItems = formData.line_items
+        .filter(item => item.tipo_maquina || item.numero_maquina || item.numero_patrimonio || item.produto_quantidade_aplicada || item.material_acabamento || item.material_onde_aplicado)
+        .map(item => ({
+          tipo_maquina: item.tipo_maquina,
+          numero_maquina: item.numero_maquina,
+          numero_patrimonio: item.numero_patrimonio,
+          produto_quantidade_aplicada: item.produto_quantidade_aplicada,
+          material_acabamento: item.material_acabamento,
+          material_onde_aplicado: item.material_onde_aplicado,
+        }));
 
       const reportNumber = formData.report_number || await generateReportNumber(userId || formData.user_id, currentUserName || 'Usuário');
 
@@ -264,6 +275,45 @@ export default function NovoRelatorio() {
                 placeholder="Descreva o serviço realizado..."
               />
             </div>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Produto</label>
+                <input
+                  type="text"
+                  value={formData.produto || ''}
+                  onChange={(e) => handleHeaderChange('produto', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ordem de Produção</label>
+                <input
+                  type="text"
+                  value={formData.ordem_producao || ''}
+                  onChange={(e) => handleHeaderChange('ordem_producao', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ordem de Venda</label>
+                <input
+                  type="text"
+                  value={formData.ordem_venda || ''}
+                  onChange={(e) => handleHeaderChange('ordem_venda', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Lote</label>
+                <input
+                  type="text"
+                  value={formData.lote || ''}
+                  onChange={(e) => handleHeaderChange('lote', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Line Items Section - Manutenção */}
@@ -378,6 +428,7 @@ export default function NovoRelatorio() {
                       />
                     </div>
                   </div>
+
 
                   <div className="flex justify-end">
                     <button
