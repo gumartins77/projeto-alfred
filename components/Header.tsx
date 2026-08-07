@@ -11,11 +11,16 @@ export default function Header() {
   const [canInstall, setCanInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
+  const [isIos, setIsIos] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     const updateStandalone = () => setIsStandalone(mediaQuery.matches);
     updateStandalone();
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    setIsIos(/iphone|ipad|ipod/.test(userAgent));
 
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
@@ -40,17 +45,23 @@ export default function Header() {
     };
   }, []);
 
+  const shouldShowInstallButton = !isStandalone && (canInstall || isIos);
+
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (canInstall && deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setCanInstall(false);
+      }
 
-    if (outcome === 'accepted') {
-      setCanInstall(false);
+      setDeferredPrompt(null);
+      setShowInstallInstructions(false);
+      return;
     }
 
-    setDeferredPrompt(null);
+    setShowInstallInstructions(true);
   };
 
   const handleLogout = async () => {
@@ -66,7 +77,7 @@ export default function Header() {
         </h1>
 
         <div className="hidden sm:flex items-center gap-2">
-          {canInstall && (
+          {shouldShowInstallButton && (
             <button
               onClick={handleInstall}
               className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition text-sm font-medium"
@@ -96,7 +107,7 @@ export default function Header() {
           {showMenu && (
             <div className="absolute top-full right-0 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden z-50">
               <div className="flex flex-col">
-                {canInstall && (
+                {shouldShowInstallButton && (
                   <button
                     onClick={handleInstall}
                     className="flex items-center gap-2 w-full px-4 py-3 text-blue-700 hover:bg-blue-50 border-b border-gray-200"
@@ -113,6 +124,20 @@ export default function Header() {
                   <LogOut size={20} />
                   <span>Sair</span>
                 </button>
+
+                {showInstallInstructions && (
+                  <div className="border-t border-gray-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                    {isIos ? (
+                      <p>
+                        Para instalar no iPhone/iPad, toque no botão de compartilhar e escolha "Adicionar à Tela de Início".
+                      </p>
+                    ) : (
+                      <p>
+                        Use o menu do navegador e selecione "Instalar app" ou "Adicionar à tela inicial".
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
