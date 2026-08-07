@@ -59,7 +59,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header className="relative bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
         <h1 className="text-lg sm:text-2xl font-bold text-gray-800">
           Relatórios
@@ -85,36 +85,38 @@ export default function Header() {
           </button>
         </div>
 
-        <div className="sm:hidden">
+        <div className="sm:hidden relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 hover:bg-gray-100 rounded-lg"
           >
             <Menu size={24} />
           </button>
+
+          {showMenu && (
+            <div className="absolute top-full right-0 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden z-50">
+              <div className="flex flex-col">
+                {canInstall && (
+                  <button
+                    onClick={handleInstall}
+                    className="flex items-center gap-2 w-full px-4 py-3 text-blue-700 hover:bg-blue-50 border-b border-gray-200"
+                  >
+                    <Download size={18} />
+                    <span>Instalar app</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 w-full px-4 py-3 text-red-600 hover:bg-red-50"
+                >
+                  <LogOut size={20} />
+                  <span>Sair</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-
-        {showMenu && (
-          <div className="absolute top-full right-0 bg-white border-b border-gray-200 w-full sm:hidden">
-            {canInstall && (
-              <button
-                onClick={handleInstall}
-                className="flex items-center gap-2 w-full px-4 py-3 text-blue-700 hover:bg-blue-50 border-t border-gray-200"
-              >
-                <Download size={18} />
-                <span>Instalar app</span>
-              </button>
-            )}
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 w-full px-4 py-3 text-red-600 hover:bg-red-50 border-t border-gray-200"
-            >
-              <LogOut size={20} />
-              <span>Sair</span>
-            </button>
-          </div>
-        )}
         </div>
       </header>
   );

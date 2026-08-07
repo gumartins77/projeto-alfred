@@ -3,18 +3,11 @@ import html2canvas from 'html2canvas';
 import { MaintenanceReport, MaintenanceReportPart } from './types';
 import { formatDate } from './utils';
 
-export async function generatePDF(report: MaintenanceReport, parts: { parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }) {
-  // Create a temporary container for PDF content
-  const container = document.createElement('div');
-  container.style.position = 'absolute';
-  container.style.left = '-9999px';
-  container.style.width = '210mm';
-  container.style.backgroundColor = 'white';
-  container.style.padding = '20px';
-  container.style.fontFamily = 'Arial, sans-serif';
+const A4_WIDTH = 210;
+const A4_HEIGHT = 297;
 
-  // Build HTML content
-  const html = `
+function createReportHtml(report: MaintenanceReport, parts: { parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }) {
+  return `
     <div style="width: 100%; font-family: Arial, sans-serif; color: #333;">
       <div style="border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
         <h1 style="margin: 0; text-align: center; font-size: 22px; font-weight: bold;">BOLETIM DE MANUTENÇÃO</h1>
@@ -187,12 +180,20 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
       </div>
     </div>
   `;
+}
 
-  container.innerHTML = html;
+async function renderReportCanvas(report: MaintenanceReport, parts: { parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }) {
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.width = '210mm';
+  container.style.backgroundColor = 'white';
+  container.style.padding = '20px';
+  container.style.fontFamily = 'Arial, sans-serif';
+  container.innerHTML = createReportHtml(report, parts);
   document.body.appendChild(container);
 
   try {
-    // Convert HTML to canvas
     const canvas = await html2canvas(container, {
       scale: 2,
       useCORS: true,
@@ -200,33 +201,79 @@ export async function generatePDF(report: MaintenanceReport, parts: { parts1: Ma
       backgroundColor: '#ffffff',
     });
 
-    // Create PDF
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-    });
-
-    const imgWidth = 210;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    const imgData = canvas.toDataURL('image/png');
-
-    // Add pages if content exceeds one page
-    while (heightLeft > 0) {
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= 297; // A4 height
-      position = heightLeft - imgHeight;
-      if (heightLeft > 0) {
-        pdf.addPage();
-      }
-    }
-
-    // Download PDF
-    pdf.save(`relatorio_${report.report_number || report.date}.pdf`);
+    return canvas;
   } finally {
     document.body.removeChild(container);
   }
+}
+
+function appendCanvasToPdf(pdf: jsPDF, canvas: HTMLCanvasElement) {
+  const imgData = canvas.toDataURL('image/png');
+  const imgWidth = A4_WIDTH;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  while (heightLeft > 0) {
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= A4_HEIGHT;
+    position = heightLeft - imgHeight;
+    if (heightLeft > 0) {
+      pdf.addPage();
+    }
+  }
+}
+
+function normalizeFileName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[ -]/g, (char) => char)
+    .replace(/[^a-zA-Z0-9_-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+}
+
+export async function generatePDF(report: MaintenanceReport, parts: { parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }) {
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const canvas = await renderReportCanvas(report, parts);
+  appendCanvasToPdf(pdf, canvas);
+
+  const fileName = `relatorio_${normalizeFileName(report.report_number || report.date)}.pdf`;
+  pdf.save(fileName);
+}
+
+export async function generateMonthlyPDF(
+  reports: MaintenanceReport[],
+  partsByReport: Record<string, { parts1: MaintenanceReportPart[]; parts2: MaintenanceReportPart[] }>,
+  monthLabel: string
+) {
+  if (reports.length === 0) {
+    return;
+  }
+
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  for (let index = 0; index < reports.length; index += 1) {
+    const report = reports[index];
+    const reportParts = partsByReport[report.id || ''] || { parts1: [], parts2: [] };
+    const canvas = await renderReportCanvas(report, reportParts);
+    appendCanvasToPdf(pdf, canvas);
+
+    if (index < reports.length - 1) {
+      pdf.addPage();
+    }
+  }
+
+  const fileName = `relatorios_${normalizeFileName(monthLabel)}.pdf`;
+  pdf.save(fileName);
 }
