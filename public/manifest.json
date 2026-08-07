@@ -5,6 +5,8 @@
   "description": "Plataforma de gerenciamento de relatórios de manutenção",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "prefer_related_applications": false,
   "scope": "/",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",

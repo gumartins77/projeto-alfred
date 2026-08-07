@@ -45,7 +45,7 @@ export default function Header() {
     };
   }, []);
 
-  const shouldShowInstallButton = !isStandalone && (canInstall || isIos);
+  const shouldShowInstallButton = !isStandalone;
 
   const handleInstall = async () => {
     if (canInstall && deferredPrompt) {
